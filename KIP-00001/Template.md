@@ -1,4 +1,4 @@
-*Please Copy this template KIP when submitting a proposal*
+*Please copy this template KIP when submitting a proposal*
 
 Proposed
 ---
