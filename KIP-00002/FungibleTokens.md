@@ -3,7 +3,7 @@ Proposed
 
 `Title:` Fungible Token
 
-`Created:` <date created on>  
+`Created:` <Date created on.>  
 
 `Author:` < Name | Pseudonym> and best method of contact.  
 
