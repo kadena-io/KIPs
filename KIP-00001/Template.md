@@ -3,9 +3,9 @@
 Proposed
 ---
 
-`Title:`<add succinct but descriptive>  
+`Title:`<add succinct but descriptive title>  
 
-`Created:` <date created on>  
+`Created:` <Insert date proposed.>  
 
 `Author:` < Name | Pseudonym> and best method of contact.  
 

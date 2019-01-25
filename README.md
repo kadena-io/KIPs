@@ -4,13 +4,15 @@ The Kadena Improvement Process
 [![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://discord.gg/G7KE62H)
 
 
-Kadena Improvement Proposals (KIPs) are used to support and crowdsourced
-important features for different technologies developed by Kadena, smart
-contracting language [Pact](https://github.com/kadena-io/pact) and soon,
-Chainweb our public Proof of Work blockchain network. Please use the
-[KIP Template](KIP-00001/Template.md) when submitting a proposal to the
-KIPs@kadena.io mailing list. Once approved, please open a PR. After refining and
-team acceptance, we will assign it a number and publish open KIPs here.
+Kadena Improvement Proposals (KIPs) are used to support development and
+crowdsource important features requests for different technologies developed by
+Kadena, namely, the smart contracting language
+[Pact](https://github.com/kadena-io/pact) and soon, Chainweb our public Proof of
+Work blockchain network. Please use the[KIP Template](KIP-00001/Template.md)
+when submitting a proposal to the KIPs@kadena.io mailing list. Once approved,
+please open a PR. After refining and the core team's general acceptance, we will
+assign it a number in the chronological order it is proposed and publish the
+open KIPs to this repo.
 
 [TODO: insert policy of how we accept KIPs]
 
