@@ -8,7 +8,7 @@ Kadena Improvement Proposals (KIPs) are used to support and crowdsourced
 important features for different technologies developed by Kadena, smart
 contracting language [Pact](https://github.com/kadena-io/pact) and soon,
 Chainweb our public Proof of Work blockchain network. Please use the
-[KIP Template](TODO:insert link) when submitting a proposal to the
+[KIP Template](KIP-00001/Template.md) when submitting a proposal to the
 KIPs@kadena.io mailing list. Once approved, please open a PR. After refining and
 team acceptance, we will assign it a number and publish open KIPs here.
 
