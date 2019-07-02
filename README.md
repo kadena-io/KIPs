@@ -1,4 +1,4 @@
-Kadena Improvement Proposals
+Kadena Improvement Proposals (KIPs)
 ===
 
 [![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://discord.gg/G7KE62H)
