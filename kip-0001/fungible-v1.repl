@@ -1,0 +1,100 @@
+(begin-tx)
+
+(load "fungible-v1.pact")
+
+(module fungible-v1-minimal GOV
+  "Minimal implementation of 'fungible-v1' standard."
+
+  (defschema account-schema
+    balance:decimal
+    guard:guard)
+
+  (deftable ledger:{account-schema})
+
+  (defcap GOV () true)
+
+  (defun transfer:string
+    ( sender:string
+      receiver:string
+      amount:decimal
+      )
+    (transfer-create
+     sender
+     receiver
+     (at 'guard (read ledger sender)))
+  )
+
+  (defun transfer-create:string
+    ( sender:string
+      receiver:string
+      receiver-guard:guard
+      amount:decimal
+    )
+    (enforce (!= sender "") "valid sender")
+    (enforce (!= receiver "") "valid receiver")
+    (enforce (!= sender receiver) "same sender and receiver")
+    (enforce (> amount 0.0) "amount > 0")
+    (let* ((s (read ledger sender)))
+      (enforce-guard (at 'guard s))
+      (enforce (>= (at 'balance s) amount) "Insufficient funds")
+      (with-default-read ledger receiver
+        { 'balance: 0
+        , 'guard: receiver-guard }
+        { 'balance := rbal
+        , 'guard := rguard }
+        (enforce (= rguard receiver-guard) "Invalid receiver guard")
+
+        (update ledger sender
+                { 'balance: (- (at 'balance s) amount)
+                })
+        (write ledger receiver
+               { 'balance: (+ rbal amount)
+               , 'guard: rguard
+               })
+        "Transfer succeeded"))
+  )
+
+  (defun balance:decimal
+    ( account:string
+    )
+    (at 'balance (read ledger account))
+  )
+
+  (defun details:object
+    ( account:string
+    )
+    (read ledger account)
+  )
+
+  (defun precision:integer
+    ()
+    12
+  )
+
+  (defun enforce-unit:string
+    ( amount:decimal
+    )
+    (enforce
+      (= (floor amount (precision)) amount)
+      "Minimum precision failed")
+  )
+
+  (defun create-account:string
+    ( account:string
+      guard:guard
+    )
+    (insert ledger account {'balance: 0.0, 'guard:guard})
+    "Account created"
+  )
+
+  (defun rotate:string
+    ( account:string
+      new-guard:guard
+    )
+    (enforce-guard (at 'guard (read ledger account)))
+    (update ledger account { 'guard: new-guard })
+  )
+
+)
+
+(commit-tx)
