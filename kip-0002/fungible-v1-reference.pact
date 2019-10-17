@@ -102,7 +102,7 @@
     receiver-guard:guard
     amount:decimal)
 
-  (defpact transfer-chain:string
+  (defpact teleport-transfer:string
     ( sender:string
       receiver:string
       receiver-guard:guard
@@ -184,6 +184,7 @@
     ( account:string
       guard:guard
     )
+    (enforce-guard guard)
     (insert ledger account {'balance: 0.0, 'guard:guard})
     "Account created"
   )
@@ -193,6 +194,7 @@
       new-guard:guard
     )
     (enforce-guard (at 'guard (read ledger account)))
+    (enforce-guard new-guard)
     (update ledger account { 'guard: new-guard })
   )
 
