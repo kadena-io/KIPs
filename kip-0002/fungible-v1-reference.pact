@@ -157,12 +157,12 @@
     ( account:string
     )
     (with-read ledger account
-      { 'balance:= b
-      , 'guard:= g
+      { 'balance := b
+      , 'guard := g
       }
-      { 'balance: b
-      , 'guard: g
-      , 'account: account
+      { 'balance : b
+      , 'guard : g
+      , 'account : account
       })
   )
 
