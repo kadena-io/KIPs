@@ -12,13 +12,13 @@
 
   (defcap GOV () true)
 
-  (defcap DEBIT (sender:string amount:decimal)
+  (defcap DEBIT (sender:string)
     "Debit is protected by SENDER guard."
     (enforce-guard (at 'guard (read ledger sender)))
     (enforce (!= sender "") "valid sender")
   )
 
-  (defcap CREDIT (receiver:string amount:decimal)
+  (defcap CREDIT (receiver:string)
     "Credit marker guard."
     (enforce (!= receiver "") "valid receiver")
   )
@@ -31,8 +31,8 @@
     @managed TRANSFER-mgr
     (enforce (!= sender receiver) "same sender and receiver")
     (enforce-unit amount)
-    (compose-capability (DEBIT sender amount))
-    (compose-capability (CREDIT receiver amount))
+    (compose-capability (DEBIT sender))
+    (compose-capability (CREDIT receiver))
   )
 
   (defun TRANSFER-mgr:object{fungible-v1.transfer-schema}
@@ -44,7 +44,7 @@
     (let* ((bal:decimal (at 'amount managed))
            (amt:decimal (at 'amount requested))
            (rem:decimal (- bal amt)))
-      (enforce (>= rem 0.0) (format "TRANSFER exceeded for balance {}" bal))
+      (enforce (>= rem 0.0) (format "TRANSFER exceeded for balance {}" [bal]))
       (+ { 'amount: rem } managed))
   )
 
@@ -56,7 +56,7 @@
     (transfer-create
      sender
      receiver
-     (at 'guard (read ledger sender))
+     (at 'guard (read ledger receiver))
      amount)
   )
 
@@ -73,7 +73,7 @@
   )
 
   (defun debit (sender:string amount:decimal)
-    (require-capability (DEBIT sender amount))
+    (require-capability (DEBIT sender))
     (with-read ledger sender
       { 'balance:= bal }
       (enforce (>= bal amount) "Insufficient funds")
@@ -83,13 +83,14 @@
   )
 
   (defun credit (receiver:string receiver-guard:guard amount:decimal)
-    (require-capability (CREDIT receiver amount))
+    (require-capability (CREDIT receiver))
     (with-default-read ledger receiver
       { 'balance: 0.0
       , 'guard: receiver-guard }
       { 'balance := rbal
       , 'guard := rguard }
-      (enforce (= rguard receiver-guard) "Invalid receiver guard")
+      (enforce (= rguard receiver-guard)
+        (format "Invalid receiver guard: {} {}" [rguard receiver-guard]))
 
       (write ledger receiver
              { 'balance: (+ rbal amount)
@@ -97,12 +98,12 @@
              }))
   )
 
-  (defschema spv-schema
+  (defschema crosschain-schema
     receiver:string
     receiver-guard:guard
     amount:decimal)
 
-  (defpact teleport-transfer:string
+  (defpact transfer-crosschain:string
     ( sender:string
       receiver:string
       receiver-guard:guard
@@ -128,7 +129,7 @@
        (debit sender amount)
 
        (yield
-         (let ((v:object{spv-schema}
+         (let ((v:object{crosschain-schema}
                 { "receiver" : receiver
                 , "receiver-guard" : receiver-guard
                 , "amount" : amount
@@ -142,7 +143,7 @@
        , "receiver-guard" := receiver-guard
        , "amount" := amount
        }
-       (with-capability (CREDIT receiver amount)
+       (with-capability (CREDIT receiver)
          (credit receiver receiver-guard amount))
        ))
    )

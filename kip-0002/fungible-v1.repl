@@ -6,3 +6,189 @@
 (verify 'fungible-v1-reference)
 
 (commit-tx)
+
+(begin-tx)
+
+; create fungible token ledger
+(create-table fungible-v1-reference.ledger)
+
+(commit-tx)
+(begin-tx)
+
+; import token reference impl
+(use fungible-v1-reference)
+
+
+; set user1 keys and set sig
+(env-data
+  { "user1" : ["user1-keys"]
+  , "user2" : ["user2-keys"]
+  })
+
+(env-keys ["user1-keys", "user2-keys"])
+
+
+; create 'user1' account in ledger
+(expect
+  "Account creation succeeds for user1"
+  "Account created"
+  (create-account "user1" (read-keyset "user1")))
+
+; create 'user2' account in ledger
+(expect
+  "Account creation succeeds for user2"
+  "Account created"
+  (create-account "user2" (read-keyset "user2")))
+
+(commit-tx)
+
+(begin-tx)
+
+(use fungible-v1-reference)
+
+; check account balances
+(expect
+  "Initial balances are set to 0 for 'user1'"
+  0.0
+  (get-balance "user1"))
+
+(expect
+  "Initial balances are set to 0 for 'user2'"
+  0.0
+  (get-balance "user2"))
+
+; rotate keyset for 'user1'
+(env-data
+  { "user1" : ["user1-keys"]
+  , "user2" : ["user2-keys"]
+  , "user3" : ["user3-keys"]
+  })
+(env-keys ["user1-keys", "user3-keys"])
+
+(expect
+  "Successful rotation of user1's keyset to user3"
+  "Write succeeded"
+  (rotate "user1" (read-keyset "user3")))
+
+(commit-tx)
+
+(begin-tx)
+
+(use fungible-v1-reference)
+
+; 'user2' keys + rotated keyset for 'user1'
+(env-data
+  { "user2" : ["user2-keys"]
+  , "user3" : ["user3-keys"]
+  })
+(env-keys ["user2-keys", "user3-keys"])
+
+; setup - credit coins to each user
+(expect-failure
+  "CREDIT capability must be in scope for credits to succeed"
+  (credit "user1" (read-keyset "user3") 10.0))
+
+(test-capability (CREDIT "user1"))
+(credit "user1" (read-keyset "user3") 10.0)
+(test-capability (CREDIT "user2"))
+(credit "user2" (read-keyset "user2") 10.0)
+
+(commit-tx)
+(begin-tx)
+
+(use fungible-v1-reference)
+
+(env-data
+  { "user2" : ["user2-keys"]
+  , "user3" : ["user3-keys"]
+  })
+(env-keys ["user2-keys", "user3-keys"])
+
+; transfer a coin from user1 to user2
+(expect-failure
+  "transfer 1 coin from user1 to user2 fails for lack of capability"
+  (transfer "user1" "user2" 1.0))
+
+(test-capability (TRANSFER "user1" "user2" 1.0))
+
+(expect
+  "transfer of 1 coin from user1 to user2 succeeds"
+  "Write succeeded"
+  (transfer "user1" "user2" 1.0))
+
+(expect
+  "New account balance for 'user2' is now 11.0"
+  11.0
+  (get-balance "user2"))
+
+; transfer-creates create a new user if not found, with specified guard
+(test-capability (TRANSFER "user1" "user4" 1.0))
+(expect
+  "transfer-create creates 'user4' and transfers 1 token from 'user1'"
+  "Write succeeded"
+  (transfer-create "user1" "user4" (read-keyset "user3") 1.0))
+
+(expect
+  "New user 'user4' now exists, and 1.0 has been transferred safely to them"
+  { "balance" : 1.0, "guard" : (read-keyset "user3"), "account" : "user4" }
+  (details "user4"))
+
+(commit-tx)
+(begin-tx)
+
+(use fungible-v1-reference)
+
+(env-data
+  { "user1" : ["user3-keys"]
+  , "user2" : ["user2-keys"]
+  , "user5" : ["user5-keys"]
+  })
+(env-keys ["user2-keys", "user3-keys", "user5-keys"])
+
+; cross-chain transfers are an example of cross-blockchain continuations using
+; the 'defpact' feature
+(env-hash (hash "cross-chain"))
+(env-chain-data { "chain-id" : "0" })
+
+(expect-failure
+  "Cross-chain transfers also require capabilities to be in scope"
+  (transfer-crosschain "user1" "user5" (read-keyset "user5") "1" 1.0))
+
+(test-capability (TRANSFER "user1" "user5" 1.0))
+
+(expect-failure
+  "Cross-chain transfers cannot occur on the same chain"
+  (transfer-crosschain "user1" "user5" (read-keyset "user5") "0" 1.0))
+
+; first half: burn 1.0 tokens
+(expect
+  "Cross-chain transfer succeeds for the first half of the transfer"
+  { "receiver": "user5", "receiver-guard": (read-keyset "user5"), "amount": 1.0 }
+  (transfer-crosschain "user1" "user5" (read-keyset "user5") "1" 1.0))
+
+
+; second half: create 1.0 tokens on new target chain
+(expect-failure
+  "Cross-chain transfers can only be executed on correct target chain"
+  (continue-pact 1 false (hash "cross-chain")
+    { "receiver" : "user5"
+    , "receiver-guard" : (read-keyset "user5")
+    , "amount" : 1.0
+    }))
+
+(env-chain-data { "chain-id" : "1" })
+
+(expect
+  "Cross-chain transfer succeeds on correct chain"
+  "Write succeeded"
+  (continue-pact 1 false (hash "cross-chain")
+    { "receiver" : "user5"
+    , "receiver-guard" : (read-keyset "user5")
+    , "amount" : 1.0
+    }))
+
+; account details should be reflected in "user2"'s balance
+(expect
+  "Account details for newly created 'user5' now reflect the cross-chain details"
+  { "balance" : 1.0, "guard": (read-keyset "user5"), "account" : "user5" }
+  (details "user5"))
