@@ -49,6 +49,7 @@
 
 (begin-tx)
 (use test.non-fungible-v1-reference)
+(use test.T)
 (expect-failure "Managed cap needed"
   "Managed capability not installed"
   (transfer "Bob" "Alice" "A"))
@@ -64,10 +65,17 @@
 (expect "Transfer succeeds"
   "Write succeeded"
   (transfer "Bob" "Alice" "A"))
+
+(expect "transfer events"
+  [(ev "TRANSFER" ["Bob" "Alice" "A"])]
+  (env-events true))
 (expect "Alice owner of A" "Alice" (owner-of "A"))
 (expect "Transfer back succeeds"
   "Write succeeded"
   (transfer "Alice" "Bob" "A"))
+(expect "transfer events"
+  [(ev "TRANSFER" ["Alice" "Bob" "A"])]
+  (env-events true))
 (expect "Bob owner of A" "Bob" (owner-of "A"))
 (expect-failure "Only one transfer for cap"
   "Capability already fired"
@@ -79,6 +87,7 @@
 
 (begin-tx)
 (use test.non-fungible-v1-reference)
+(use test.T)
 (env-data { 'k: ["carol"]})
 (expect-failure "No carol account" "row not found"
   (details "Carol"))
@@ -96,9 +105,44 @@
 (expect "Transfer succeeds"
   "Write succeeded"
   (transfer-create "Bob" "Carol" (read-keyset 'k) "A"))
+(expect "transfer events"
+  [ (ev "TRANSFER" ["Bob" "Carol" "A"])
+  , (ev "ACCOUNT" ["Carol" (read-keyset 'k)])
+  ]
+  (env-events true))
+
 (expect "Carol owner of A" "Carol" (owner-of "A"))
 (expect "Carol balance" 1 (balance-of "Carol"))
 (expect "Bob balance" 1 (balance-of "Bob"))
 (rollback-tx)
 
+;;
 ;; rotate
+;;
+
+(use test.non-fungible-v1-reference)
+(use test.T)
+(env-data { 'k: ["bob2"]})
+(expect-failure "rotate without cap"
+  "Managed capability not installed"
+  (rotate "Bob" (read-keyset 'k)))
+(env-sigs [ {'key: "alice", 'caps: [(ROTATE "Bob")]}
+          ])
+(expect-failure "rotate bad signer"
+  "Keyset failure"
+  (rotate "Bob" (read-keyset 'k)))
+(env-sigs [ {'key: "bob", 'caps: [(ROTATE "Alice")]}
+          ])
+(expect-failure "rotate bad cap"
+  "Managed capability not installed"
+  (rotate "Bob" (read-keyset 'k)))
+(env-sigs [ {'key: "bob", 'caps: [(ROTATE "Bob")]}
+          ])
+(expect "rotate success"
+  "Write succeeded"
+  (rotate "Bob" (read-keyset 'k)))
+(expect "rotate events"
+  [ (ev "ROTATE" ["Bob"])
+  , (ev "ACCOUNT" ["Bob" (read-keyset 'k)])
+  ]
+  (env-events true))
