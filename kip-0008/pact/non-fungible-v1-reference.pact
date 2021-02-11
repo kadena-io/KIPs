@@ -183,9 +183,11 @@
     (step
       (with-capability (TRANSFER sender receiver id)
         (with-capability (SEND-CROSSCHAIN sender receiver receiver-guard target-chain id)
-          (update items id { 'owner: NULL_OWNER })
           (validate-identifier target-chain)
-          (let ((r:object{xchain} { 'source-chain: (at 'chain-id (chain-data)) }))
+          (let* ( (cid (at 'chain-id (chain-data)))
+                  (r:object{xchain} { 'source-chain: cid }))
+            (enforce (!= cid target-chain) "Target chain must differ from source")
+            (update items id { 'owner: NULL_OWNER })
             (yield r target-chain)))))
     (step
       (resume { 'source-chain:= source-chain }

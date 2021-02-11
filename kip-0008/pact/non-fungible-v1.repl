@@ -146,3 +146,53 @@
   , (ev "ACCOUNT" ["Bob" (read-keyset 'k)])
   ]
   (env-events true))
+(rollback-tx)
+
+;;
+;; cross-chain
+;;
+(begin-tx)
+(use test.non-fungible-v1-reference)
+(use test.T)
+(env-chain-data { 'chain-id: "0" })
+(env-data { 'k: ["carol"] })
+
+(expect-failure "Managed cap needed"
+  "Managed capability not installed"
+  (transfer-crosschain "Bob" "Carol" (read-keyset 'k) "1" "A"))
+
+(env-sigs [{'key: "bob", 'caps: [(TRANSFER "Bob" "Carol" "B")]}])
+(expect-failure "Wrong owner"
+  "Sender is not owner"
+  (transfer-crosschain "Bob" "Carol" (read-keyset 'k) "1" "B"))
+
+(env-sigs [ {'key: "bob", 'caps: [(TRANSFER "Bob" "Carol" "A")]}
+          ])
+(expect-failure "Bad target chain"
+  "Target chain must differ"
+  (transfer-crosschain "Bob" "Carol" (read-keyset 'k) "0" "A"))
+
+(expect "Step 1 succeeds"
+  { 'source-chain: "0" }
+  (transfer-crosschain "Bob" "Carol" (read-keyset 'k) "1" "A"))
+
+(expect "step 1 events"
+  [ (ev "TRANSFER" ["Bob" "Carol" "A"])
+  , (ev "SEND-CROSSCHAIN" ["Bob" "Carol" (read-keyset 'k) "1" "A"])
+  ]
+  (env-events true))
+
+(expect "Null owner of A" "NULL_OWNER" (owner-of "A"))
+(expect "Carol balance" 0 (balance-of "Carol"))
+(expect "Bob balance" 1 (balance-of "Bob"))
+
+(env-chain-data { 'chain-id: "1" })
+(continue-pact 1)
+(expect "Carol owner of A" "Carol" (owner-of "A"))
+(expect "Carol balance" 1 (balance-of "Carol"))
+(expect "Bob balance" 1 (balance-of "Bob"))
+(expect "step 1 events"
+  [ (ev "RECEIVE-CROSSCHAIN" ["Bob" "Carol" (read-keyset 'k) "0" "A"])
+  , (ev "ACCOUNT" ["Carol" (read-keyset 'k)])
+  ]
+  (env-events true))
