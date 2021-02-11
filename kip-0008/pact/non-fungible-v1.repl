@@ -1,0 +1,104 @@
+(begin-tx)
+(env-data { 'ns: "test" })
+(define-namespace "test" (sig-keyset) (sig-keyset))
+
+(load "non-fungible-v1.pact")
+(load "non-fungible-v1-reference.pact")
+
+(module T G
+  (defcap G () true)
+  (defconst M "test.non-fungible-v1-reference")
+  (defconst H (at 'hash (describe-module M)))
+  (defun q (s:string) (format "{}.{}" [M s]))
+  (defun ev (n:string ps)
+    { "module-hash": H
+    , "name": (q n)
+    , "params": ps }))
+
+(expect "null account events"
+  [(ev "ACCOUNT" ["NULL_OWNER" (null-owner-guard)])]
+  (env-events true))
+
+(env-data { 'bob: ["bob"], 'alice: ["alice"]})
+(create-account "Bob" (read-keyset 'bob))
+(create-account "Alice" (read-keyset 'alice))
+
+(expect "Bob/Alice events"
+  [ (ev "ACCOUNT" ["Bob" (read-keyset 'bob)])
+  , (ev "ACCOUNT" ["Alice" (read-keyset 'alice)])
+  ]
+  (env-events true))
+
+(create-item "A" "Bob")
+(create-item "B" "Alice")
+(create-item "C" "Bob")
+
+(expect "Bob balance-of" 2 (balance-of "Bob"))
+(expect "Alice balance-of" 1 (balance-of "Alice"))
+
+(expect "Bob owner of A" "Bob" (owner-of "A"))
+(expect "Alice owner of B" "Alice" (owner-of "B"))
+(expect "Bob owner of C" "Bob" (owner-of "C"))
+
+(typecheck "test.non-fungible-v1-reference")
+
+(commit-tx)
+
+
+;; transfer
+
+(begin-tx)
+(use test.non-fungible-v1-reference)
+(expect-failure "Managed cap needed"
+  "Managed capability not installed"
+  (transfer "Bob" "Alice" "A"))
+
+(env-sigs [{'key: "bob", 'caps: [(TRANSFER "Bob" "Alice" "B")]}])
+(expect-failure "Wrong owner"
+  "Sender is not owner"
+  (transfer "Bob" "Alice" "B"))
+
+(env-sigs [ {'key: "bob", 'caps: [(TRANSFER "Bob" "Alice" "A")]}
+          , {'key: "alice", 'caps: [(TRANSFER "Alice" "Bob" "A")]}
+          ])
+(expect "Transfer succeeds"
+  "Write succeeded"
+  (transfer "Bob" "Alice" "A"))
+(expect "Alice owner of A" "Alice" (owner-of "A"))
+(expect "Transfer back succeeds"
+  "Write succeeded"
+  (transfer "Alice" "Bob" "A"))
+(expect "Bob owner of A" "Bob" (owner-of "A"))
+(expect-failure "Only one transfer for cap"
+  "Capability already fired"
+  (transfer "Bob" "Alice" "A"))
+(rollback-tx)
+
+
+;; transfer-create
+
+(begin-tx)
+(use test.non-fungible-v1-reference)
+(env-data { 'k: ["carol"]})
+(expect-failure "No carol account" "row not found"
+  (details "Carol"))
+(expect-failure "Managed cap needed"
+  "Managed capability not installed"
+  (transfer-create "Bob" "Carol" (read-keyset 'k) "A"))
+
+(env-sigs [{'key: "bob", 'caps: [(TRANSFER "Bob" "Carol" "B")]}])
+(expect-failure "Wrong owner"
+  "Sender is not owner"
+  (transfer-create "Bob" "Carol" (read-keyset 'k) "B"))
+
+(env-sigs [ {'key: "bob", 'caps: [(TRANSFER "Bob" "Carol" "A")]}
+          ])
+(expect "Transfer succeeds"
+  "Write succeeded"
+  (transfer-create "Bob" "Carol" (read-keyset 'k) "A"))
+(expect "Carol owner of A" "Carol" (owner-of "A"))
+(expect "Carol balance" 1 (balance-of "Carol"))
+(expect "Bob balance" 1 (balance-of "Bob"))
+(rollback-tx)
+
+;; rotate
