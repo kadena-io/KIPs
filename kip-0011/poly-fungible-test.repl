@@ -1,0 +1,12 @@
+
+(begin-tx)
+
+(define-namespace 'test (sig-keyset) (sig-keyset))
+(env-data { 'ns: 'test })
+(load "poly-fungible-v1.pact")
+
+(load "fungible-util.pact")
+
+(load "poly-fungible-reference.pact")
+
+(commit-tx) 
