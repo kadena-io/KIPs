@@ -7,6 +7,11 @@
   (defschema account-details
     @doc
       " Account details: token ID, account name, balance, and guard."
+    @model
+      [ (invariant (!= id ""))
+        (invariant (!= account ""))
+        (invariant (>= balance 0.0))
+      ]
     id:string
     account:string
     balance:decimal
@@ -20,7 +25,8 @@
     )
     @doc
       " Manage transferring AMOUNT of ID from SENDER to RECEIVER. \
-      \ As event, also used to notify burn and create."
+      \ As event, also used to notify burn (with \"\" RECEIVER) \
+      \ and create (with \"\" SENDER)."
     @managed amount TRANSFER-mgr
   )
 
@@ -33,12 +39,12 @@
   )
 
   (defcap URI:bool (id:string uri:string)
-    @doc " Emitted when URI is updated."
+    @doc " Emitted when URI is updated, if supported."
     @event
   )
 
   (defcap SUPPLY:bool (id:string supply:decimal)
-    @doc " Emitted when supply is updated."
+    @doc " Emitted when supply is updated, if supported."
     @event
   )
 
@@ -64,7 +70,7 @@
     @doc
       " Create ACCOUNT for ID with 0.0 balance, with GUARD controlling access."
     @model
-      [ (property (!= token ""))
+      [ (property (!= id ""))
         (property (!= account ""))
       ]
   )
@@ -92,7 +98,7 @@
     @doc
       " Rotate guard for ACCOUNT for ID to NEW-GUARD, validating against existing guard."
     @model
-      [ (property (!= token ""))
+      [ (property (!= id ""))
         (property (!= account ""))
       ]
 
@@ -109,7 +115,7 @@
       \ Fails if SENDER does not exist. Managed by TRANSFER."
     @model
       [ (property (> amount 0.0))
-        (property (!= token ""))
+        (property (!= id ""))
         (property (!= sender ""))
         (property (!= receiver ""))
         (property (!= sender receiver))
@@ -130,7 +136,7 @@
       \ Managed by TRANSFER."
     @model
       [ (property (> amount 0.0))
-        (property (!= token ""))
+        (property (!= id ""))
         (property (!= sender ""))
         (property (!= receiver ""))
         (property (!= sender receiver))
@@ -151,7 +157,7 @@
       \ must match existing guard. If RECEIVER does not exist, account is created."
     @model
       [ (property (> amount 0.0))
-        (property (!= token ""))
+        (property (!= id ""))
         (property (!= sender ""))
         (property (!= receiver ""))
         (property (!= target-chain ""))
