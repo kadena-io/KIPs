@@ -7,19 +7,19 @@
   (defschema account-details
     @doc
       " Account details: token ID, account name, balance, and guard."
-    token:string
+    id:string
     account:string
     balance:decimal
     guard:guard)
 
   (defcap TRANSFER:bool
-    ( token:string
+    ( id:string
       sender:string
       receiver:string
       amount:decimal
     )
     @doc
-      " Manage transferring AMOUNT of TOKEN from SENDER to RECEIVER. \
+      " Manage transferring AMOUNT of ID from SENDER to RECEIVER. \
       \ As event, also used to notify burn and create."
     @managed amount TRANSFER-mgr
   )
@@ -32,26 +32,37 @@
          \ and REQUESTED is the quantity attempting to be granted."
   )
 
-  (defun precision:integer (token:string)
+  (defcap URI:bool (id:string uri:string)
+    @doc " Emitted when URI is updated."
+    @event
+  )
+
+  (defcap SUPPLY:bool (id:string supply:decimal)
+    @doc " Emitted when supply is updated."
+    @event
+  )
+
+
+  (defun precision:integer (id:string)
     @doc
-      " Return maximum decimal precision for TOKEN."
+      " Return maximum decimal precision for ID."
   )
 
   (defun enforce-unit:bool
-    ( token:string
+    ( id:string
       amount:decimal
     )
     @doc
-      " Enforce that AMOUNT meets minimum precision allowed for TOKEN."
+      " Enforce that AMOUNT meets minimum precision allowed for ID."
   )
 
   (defun create-account:string
-    ( token:string
+    ( id:string
       account:string
       guard:guard
     )
     @doc
-      " Create ACCOUNT for TOKEN with 0.0 balance, with GUARD controlling access."
+      " Create ACCOUNT for ID with 0.0 balance, with GUARD controlling access."
     @model
       [ (property (!= token ""))
         (property (!= account ""))
@@ -59,27 +70,27 @@
   )
 
   (defun get-balance:decimal
-    ( token:string
+    ( id:string
       account:string
     )
     @doc
-      " Get balance of TOKEN for ACCOUNT. Fails if account does not exist."
+      " Get balance of ID for ACCOUNT. Fails if account does not exist."
   )
 
   (defun details:object{account-details}
-    ( token:string
+    ( id:string
       account:string
     )
     @doc
-      " Get details of ACCOUNT under TOKEN. Fails if account does not exist."
+      " Get details of ACCOUNT under ID. Fails if account does not exist."
   )
 
   (defun rotate:string
-    ( token:string
+    ( id:string
       account:string
       new-guard:guard )
     @doc
-      " Rotate guard for ACCOUNT for TOKEN to NEW-GUARD, validating against existing guard."
+      " Rotate guard for ACCOUNT for ID to NEW-GUARD, validating against existing guard."
     @model
       [ (property (!= token ""))
         (property (!= account ""))
@@ -88,13 +99,13 @@
   )
 
   (defun transfer:string
-    ( token:string
+    ( id:string
       sender:string
       receiver:string
       amount:decimal
     )
     @doc
-      " Transfer AMOUNT of TOKEN between accounts SENDER and RECEIVER. \
+      " Transfer AMOUNT of ID between accounts SENDER and RECEIVER. \
       \ Fails if SENDER does not exist. Managed by TRANSFER."
     @model
       [ (property (> amount 0.0))
@@ -106,14 +117,14 @@
   )
 
   (defun transfer-create:string
-    ( token:string
+    ( id:string
       sender:string
       receiver:string
       receiver-guard:guard
       amount:decimal
     )
     @doc
-      " Transfer AMOUNT of TOKEN between accounts SENDER and RECEIVER. \
+      " Transfer AMOUNT of ID between accounts SENDER and RECEIVER. \
       \ If RECEIVER exists, RECEIVER-GUARD must match existing guard; \
       \ if RECEIVER does not exist, account is created. \
       \ Managed by TRANSFER."
@@ -127,7 +138,7 @@
   )
 
   (defpact transfer-crosschain:string
-    ( token:string
+    ( id:string
       sender:string
       receiver:string
       receiver-guard:guard
@@ -135,7 +146,7 @@
       amount:decimal
     )
     @doc
-      " Transfer AMOUNT of TOKEN between accounts SENDER on source chain \
+      " Transfer AMOUNT of ID between accounts SENDER on source chain \
       \ and RECEIVER on TARGET-CHAIN. If RECEIVER exists, RECEIVER-GUARD \
       \ must match existing guard. If RECEIVER does not exist, account is created."
     @model
@@ -146,5 +157,16 @@
         (property (!= target-chain ""))
       ]
   )
+
+  (defun total-supply:decimal (id:string)
+    @doc
+      " Give total available quantity of ID. If not supported, return 0."
+  )
+
+  (defun uri:string (id:string)
+    @doc
+      " Give URI for ID. If not supported, return \"\" (empty string)."
+  )
+
 
 )
