@@ -1,4 +1,4 @@
-(interface fungible-v2
+(interface fungible-v3
 
   " Standard for fungible coins and tokens as specified in KIP-0002. "
 
@@ -7,7 +7,8 @@
 
    (defschema account-details
     @doc "Schema for results of 'account' operation."
-    @model [ (invariant (!= "" sender)) ]
+    @model [ (invariant (!= "" sender))
+             (invariant (>= balance 0.0)) ]
 
     account:string
     balance:decimal
@@ -91,20 +92,23 @@
      @model [ (property (> amount 0.0))
               (property (!= sender ""))
               (property (!= receiver ""))
-              (property (!= sender receiver))
               (property (!= target-chain ""))
             ]
      )
 
    (defun get-balance:decimal
      ( account:string )
-     " Get balance for ACCOUNT. Fails if account does not exist."
+     @doc " Get balance for ACCOUNT. Fails if account does not exist."
+     @model [ (property (!= account ""))
+              (property (>= result 0.0)) ]
      )
 
    (defun details:object{account-details}
      ( account: string )
-     " Get an object with details of ACCOUNT. \
-     \ Fails if account does not exist."
+     @doc " Get an object with details of ACCOUNT. \
+          \ Fails if account does not exist."
+     @model [ (property (!= account "")) ]
+     
      )
 
    (defun precision:integer
@@ -114,13 +118,16 @@
 
    (defun enforce-unit:bool
      ( amount:decimal )
-     " Enforce minimum precision allowed for transactions."
+     @doc " Enforce minimum precision allowed for transactions."
+     @model [ (property (>= amount 0.0)) ]
      )
 
    (defun create-account:string
      ( account:string
        guard:guard
      )
-     " Create ACCOUNT with 0.0 balance, with GUARD controlling access."
+     @doc " Create ACCOUNT with 0.0 balance, with GUARD controlling access."
+     @model [ (property (!= account "")) ]
      )
+
 )

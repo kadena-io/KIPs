@@ -5,7 +5,7 @@
 
 (begin-tx)
 (env-gas 0) (env-gaslog)
-(load "fungible-v2.pact")
+(load "fungible-v3.pact")
 (env-gaslog)
 (expect
   "Gas cost of loading fungible contract"
@@ -35,7 +35,7 @@
 
 (commit-tx)
 
-;(verify 'coin)
+(verify 'coin)
 
 ;; Account creation and account details unit tests
 
@@ -587,25 +587,25 @@
     (format "Account: {} Guard: {}" [(at 'balance i) (at 'guard i)])))
 
 ; account details will now feature rotated guard
-;; (env-keys ["keys1", "keys2"])
-;; (expect-failure
-;;   "guard rotation fails when ROTATE is not scoped"
-;;   "Managed capability not installed"
-;;   (rotate 'emily (read-keyset 'doug)))
+(env-keys ["keys1", "keys2"])
+(expect-failure
+  "guard rotation fails when ROTATE is not scoped"
+  "Managed capability not installed"
+  (rotate 'emily (read-keyset 'doug)))
 
-;; (env-sigs [{'key: "keys1", 'caps: [(coin.ROTATE "emily")]}])
-;; (install-capability (ROTATE "emily"))
+(env-sigs [{'key: "keys1", 'caps: [(coin.ROTATE "emily")]}])
+(install-capability (ROTATE "emily"))
 
-;; (expect
-;;   "guard rotation succeeds when ROTATE is scoped"
-;;   "Write succeeded"
-;;   (rotate 'emily (read-keyset 'doug)))
+(expect
+  "guard rotation succeeds when ROTATE is scoped"
+  "Write succeeded"
+  (rotate 'emily (read-keyset 'doug)))
 
-;; (expect
-;;   "account info for 'emily uses 'doug keyset after rotation"
-;;   "Account: 0.6 Guard: KeySet {keys: [keys2],pred: keys-all}"
-;;   (let ((i (details 'emily)))
-;;     (format "Account: {} Guard: {}" [(at 'balance i) (at 'guard i)])))
+(expect
+  "account info for 'emily uses 'doug keyset after rotation"
+  "Account: 0.6 Guard: KeySet {keys: [keys2],pred: keys-all}"
+  (let ((i (details 'emily)))
+    (format "Account: {} Guard: {}" [(at 'balance i) (at 'guard i)])))
 
 (commit-tx)
 

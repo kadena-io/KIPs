@@ -1,4 +1,3 @@
-
 (module coin GOVERNANCE
 
   @doc "'coin' represents the Kadena Coin Contract. This contract provides both the \
@@ -44,6 +43,66 @@
 
   (deftable coin-table:{coin-schema})
 
+    ; --------------------------------------------------------------------------
+  ; Constants
+
+  (defconst COIN_CHARSET CHARSET_LATIN1
+    "The default coin contract character set")
+
+  (defconst MINIMUM_PRECISION 12
+    "Minimum allowed precision for coin transactions")
+
+  (defconst MINIMUM_ACCOUNT_LENGTH 3
+    "Minimum account length admissible for coin accounts")
+
+  (defconst MAXIMUM_ACCOUNT_LENGTH 256
+    "Maximum account name length admissible for coin accounts")
+
+  (defconst VALID_CHAIN_IDS (map (int-to-str 10) (enumerate 0 19))
+    "List of all valid Chainweb chain ids")
+
+  ; --------------------------------------------------------------------------
+  ; Utilities
+
+  (defun enforce-unit:bool (amount:decimal)
+    @doc "Enforce minimum precision allowed for coin transactions"
+
+    (enforce (>= amount 0.0) "Positive Amount")
+
+    (enforce
+      (= (floor amount MINIMUM_PRECISION)
+         amount)
+      (format "Amount violates minimum precision: {}" [amount]))
+    )
+
+  (defun validate-account (account:string)
+    @doc "Enforce that an account name conforms to the coin contract \
+         \minimum and maximum length requirements, as well as the    \
+         \latin-1 character set."
+
+    (enforce
+      (is-charset COIN_CHARSET account)
+      (format
+        "Account does not conform to the coin contract charset: {}"
+        [account]))
+
+    (let ((account-length (length account)))
+
+      (enforce
+        (>= account-length MINIMUM_ACCOUNT_LENGTH)
+        (format
+          "Account name does not conform to the min length requirement: {}"
+          [account]))
+
+      (enforce
+        (<= account-length MAXIMUM_ACCOUNT_LENGTH)
+        (format
+          "Account name does not conform to the max length requirement: {}"
+          [account]))
+      )
+  )
+
+
   ; --------------------------------------------------------------------------
   ; Capabilities
 
@@ -69,11 +128,11 @@
   (defcap DEBIT (sender:string)
     "Capability for managing debiting operations"
     (enforce-guard (at 'guard (read coin-table sender)))
-    (enforce (!= sender "") "valid sender"))
+    (validate-account sender))
 
   (defcap CREDIT (receiver:string)
     "Capability for managing crediting operations"
-    (enforce (!= receiver "") "valid receiver"))
+    (validate-account receiver))
 
   (defcap TRANSFER:bool
     ( sender:string
@@ -140,62 +199,6 @@
     @event true
   )
 
-  ; --------------------------------------------------------------------------
-  ; Constants
-
-  (defconst COIN_CHARSET CHARSET_LATIN1
-    "The default coin contract character set")
-
-  (defconst MINIMUM_PRECISION 12
-    "Minimum allowed precision for coin transactions")
-
-  (defconst MINIMUM_ACCOUNT_LENGTH 3
-    "Minimum account length admissible for coin accounts")
-
-  (defconst MAXIMUM_ACCOUNT_LENGTH 256
-    "Maximum account name length admissible for coin accounts")
-
-  (defconst VALID_CHAIN_IDS (map (int-to-str 10) (enumerate 0 19))
-    "List of all valid Chainweb chain ids")
-
-  ; --------------------------------------------------------------------------
-  ; Utilities
-
-  (defun enforce-unit:bool (amount:decimal)
-    @doc "Enforce minimum precision allowed for coin transactions"
-
-    (enforce
-      (= (floor amount MINIMUM_PRECISION)
-         amount)
-      (format "Amount violates minimum precision: {}" [amount]))
-    )
-
-  (defun validate-account (account:string)
-    @doc "Enforce that an account name conforms to the coin contract \
-         \minimum and maximum length requirements, as well as the    \
-         \latin-1 character set."
-
-    (enforce
-      (is-charset COIN_CHARSET account)
-      (format
-        "Account does not conform to the coin contract charset: {}"
-        [account]))
-
-    (let ((account-length (length account)))
-
-      (enforce
-        (>= account-length MINIMUM_ACCOUNT_LENGTH)
-        (format
-          "Account name does not conform to the min length requirement: {}"
-          [account]))
-
-      (enforce
-        (<= account-length MAXIMUM_ACCOUNT_LENGTH)
-        (format
-          "Account name does not conform to the max length requirement: {}"
-          [account]))
-      )
-  )
 
   ; --------------------------------------------------------------------------
   ; Coin Contract
@@ -247,6 +250,7 @@
     (validate-account sender)
     (validate-account miner)
     (enforce-unit total)
+    (enforce (> total 0.0) "total gas must be greater zero")
 
     (require-capability (GAS))
     (let*
@@ -257,6 +261,7 @@
       (enforce (>= fee 0.0)
         "fee must be a non-negative quantity")
 
+      (enforce-unit refund) ; implicitly enforced by fee and total
       (enforce (>= refund 0.0)
         "refund must be a non-negative quantity")
 
@@ -293,14 +298,19 @@
     )
 
   (defun get-balance:decimal (account:string)
+    (validate-account account)
+    
     (with-read coin-table account
       { "balance" := balance }
       balance
       )
     )
 
-  (defun details:object{fungible-v2.account-details}
+  (defun details:object{fungible-v3.account-details}
     ( account:string )
+
+    (validate-account account)
+    
     (with-read coin-table account
       { "balance" := bal
       , "guard" := g }
@@ -421,10 +431,10 @@
     @model [ (property (> total 0.0))
              (property (valid-account sender))
              (property (valid-account miner))
-             ;(property conserves-mass) not supported yet
            ]
-
-    (step (buy-gas sender total))
+    (step (let ((unused 0))
+            (validate-account miner)
+            (buy-gas sender total)))
     (step (redeem-gas miner miner-guard sender total))
     )
 
@@ -581,7 +591,7 @@
 
   (defschema allocation-schema
     @doc "Genesis allocation registry"
-    ;@model [ (invariant (>= balance 0.0)) ]
+    @model [ (invariant (>= balance 0.0)) ]
 
     balance:decimal
     date:time
