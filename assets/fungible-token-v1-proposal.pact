@@ -9,7 +9,7 @@
   (defun transfer:string
     (
       sender:string
-      reciever:string
+      receiver:string
       receiver-guard:guard
       amount:decimal
     )
@@ -27,7 +27,7 @@
   (defun transfer-to:string
     (
       sender:string
-      reciever:string
+      receiver:string
       amount:decimal
     )
 
