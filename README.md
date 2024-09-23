@@ -34,6 +34,6 @@ Kadena, namely, Chainweb, our proof-of-work blockchain, and the smart contract l
 | In Discussion | <img src="https://img.shields.io/badge/Status-In%20Discussion-orange"></img> | KIP is under active consideration by the community                                                    |
 | Voting Open   | <img src="https://img.shields.io/badge/Status-Voting_Open-cyan"></img>       | KIP is currently being voted on
 | Approved      | <img src="https://img.shields.io/badge/Status-Approved-green"></img>         | KIP has been approved by rough consensus, and pending development and testing                         |
-| Deployed      | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>          | Code to implement HIP has been merged and deployed to the network                                     |
+| Deployed      | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>          | Code to implement KIP has been merged and deployed to the network                                     |
 | Rejected      | <img src="https://img.shields.io/badge/Status-Rejected-red"></img>           | KIP did not pass voting                                                                               |
 | Closed        | <img src="https://img.shields.io/badge/Status-Closed-lightgrey"></img>       | KIP abandoned, rendered obsolete by other changes, or otherwise withdrawn by the author               |
