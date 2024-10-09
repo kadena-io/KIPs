@@ -20,7 +20,7 @@ Kadena, namely, Chainweb, our proof-of-work blockchain, and the smart contract l
 |  5  | [KIP-0005: fungible-v2](https://github.com/kadena-io/KIPs/blob/master/kip-0005.md)                                      | <img src="https://img.shields.io/badge/Status-Closed-lightgrey"></img> |
 |  7  | [KIP-0007: Pact Module References](https://github.com/kadena-io/KIPs/blob/master/kip-0007.md)                           | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>    |
 | 11  | [KIP-0011: poly-fungible-v1](https://github.com/kadena-io/KIPs/blob/master/kip-0011/kip-0011.md)                        | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>    |
-| 12  | [KIP-0012: Kadena Single-Key Accounts](https://github.com/kadena-io/KIPs/blob/master/kip-0012/kip-0012.md)              | <img src="https://img.shields.io/badge/Status-Voting_Open-cyan"></img> |
+| 12  | [KIP-0012: Kadena Single-Key Accounts](https://github.com/kadena-io/KIPs/blob/master/kip-0012/kip-0012.md)              | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img> |
 | 15  | [KIP-0015: quicksign signing api v1](https://github.com/kadena-io/KIPs/blob/master/kip-0015.md)                         | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>    |
 | 17  | [KIP-0017: walletconnect-v2-sign implementation spec](https://github.com/kadena-io/KIPs/blob/master/kip-0017.md)        | <img src="https://img.shields.io/badge/Status-Voting_Open-cyan"></img> |
 | 26  | [KIP-0026: Key Derivation and Mnemonic encoding methods](https://github.com/Takadenoshi/KIPs/blob/kip-0026/kip-0026.md) | <img src="https://img.shields.io/badge/Status-Draft-yellow"></img>     |
