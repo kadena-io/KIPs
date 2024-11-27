@@ -1,0 +1,143 @@
+---
+KIP: 0034
+Title: KIP-0034: Include WebRTC WebSocket/Signal Server in Chainweb Node (Prepare for WalletConnect Replacement)
+Author: openaccess @openaccessX
+Status: Draft
+Type: Standard
+Category: P2P/Networking
+Created: 2024-11-27
+---
+
+**This shall not deter the release of current developments.**
+
+---
+
+(Note: **KIP-0033: Lightweight Confirmation Layer** has top priority. Without it, scaling systems might avoid building on Kadena and instead opt for conventional Web2 approaches. While I am unsure about Kadena's development capacity and workload, if resources are available, please consider reviewing this proposal.)
+
+---
+
+# KIP-0034: Include WebRTC WebSocket/Signal Server in Chainweb Node (Prepare for WalletConnect Replacement)
+
+---
+
+## Summary
+This proposal suggests adding a WebRTC endpoint to Chainweb nodes for text-based communication. The goal is to distribute workload, improve efficiency, and replace the WalletConnect approach. The WebRTC WebSocket would establish peer-to-peer connections between browser-based dApps (local users) and wallets (local) for secure text-only communication. 
+
+The Chainweb node would handle and validate the initial connection setup only, enhancing privacy and enabling large-scale transaction data sharing directly between peers, bypassing relay servers.
+
+---
+
+## Motivation
+In light of the company behind WalletConnect renaming itself to Reown, the inefficiencies in the messaging process, heavily limited message sizes due to server involvement, and the introduction of a coin to pay for their (unnecessary) relay service that will be imposed on wallets and users in the future, a WebRTC proof-of-concept (PoC) was developed to assess its feasibility.
+
+However, we believe there may be significant advantages in offloading the peer-to-peer connection establishment to Chainweb nodes. Kadena nodes could leverage their expertise in message validation to enhance the efficiency and reliability of local peer connections.
+
+---
+
+## Specification
+
+### **Wish**
+- Keep peers local through a simple JavaScript library that runs directly in the browser, rather than requiring an npm client, to maximize customization and minimize size.
+
+---
+
+### **1. WebRTC Endpoint Integration in Chainweb Node**
+- Add a lightweight WebRTC signaling service to Chainweb nodes with the following responsibilities:
+  - Handle signaling messages for establishing WebRTC connections between peers.
+  - (Validate connection requests and facilitate the initial exchange of offer/answer data.) - if not offloaded to peers
+  - Manage registration teardown when peers disconnect, connect, or time out.
+  - If desired, limit usage to kadena keysets
+---
+
+### **2. Peers / Connection Flow**
+
+#### **Signaling Stage**
+- **Peer A (dApp, "browser-local user")** registers on the signal server and presents its ID in QR format.
+- **Peer B (Wallet)** scans the QR code, registers on the server, retrieves Peer A’s ID, and establishes the connection (automatic offer/answer workflow).  
+- Once the WebRTC connection is established, all communication occurs directly between peers, bypassing the node.
+
+---
+
+### **3. Communication Stage**
+
+#### **Prerequisites**
+- Limit scope to **text-based messages only** for simplicity and reduced overhead.
+- Validate all incoming messages to prevent malformed or malicious data.
+- Define a standardized message schema for WebRTC signaling, e.g.:  
+  ```json
+  {
+    "type": "offer" | "answer" | "candidate",
+    "payload": {
+      "sdp": "session description protocol data",
+      "candidate": "optional candidate information"
+    },
+    "sender": "unique peer ID",
+    "secret": "new connection"
+  }
+- Include Kadena-specific schemas for transaction data (e.g., **"quicksign only"**).
+- Allows for customization to support heavy transaction loads on low-end devices.
+- Permits custom network implementations.
+
+---
+
+#### **Communication Workflow**
+1. **Exchange Unique Secrets**  
+   - Peers exchange unique secrets upon their first connection to locally register verified peers.
+
+2. **Allow Incoming Transaction Data**  
+   - Enable incoming transaction data and provide responses in the following format:  
+     ```json
+     {
+       "kadena": [ /* transactions */ ]
+     }
+     ```
+
+---
+
+#### **Reestablishing Connections** (Fully Local Workflow*)
+
+- The wallet peer has a fixed **unique ID** that can be stored in the browser (local dApp).
+- Wallet and dApp exchange **unique secrets** during initial setup.
+- Wallet access is available only when opened (otherwise it's not registered):
+  - If the wallet is closed, the user is prompted with a message like:  
+    *"Please open/reopen your wallet."*
+  - The wallet responds only if the dApp's secret is on its allowlist.
+- The signal server supports handling spam and malicious activity mitigation.
+
+---
+
+### **4. Privacy and Security**
+- Protect user privacy during the signaling process:
+  - Encrypt signaling messages using **Transport Layer Security (TLS)**.
+  - (Require wallets to authenticate their identities (e.g., using wallet signatures).) - if exchanged secrets are not sufficient
+  - Restrict the Chainweb node's role to building inital peer connections & spam mitigation:
+    - Relaying messages (offer/answer).
+    - Validating messages (offer/answer).
+  - This reduces the attack surface.
+
+---
+
+### **5. Performance and Scalability**
+- Optimize the signaling process to support high volumes of simultaneous connection requests:
+  - Implement **rate limiting** and **prioritization** to prevent abuse.
+  - Use lightweight data structures to manage peer connections efficiently.
+
+---
+
+### **6. Advantages Over WalletConnect**
+- Eliminate reliance on centralized relay servers:
+  - Reduces operational costs.
+  - Improves scalability.
+- Enable support for larger transaction data payloads:
+  - Leverage direct peer-to-peer communication.
+- Enhance privacy:
+  - Avoid unnecessary server involvement in message exchange.
+- Provide a lightweight alternative:
+  - Avoid bulky clients like WalletConnect’s 200MB+ packages for simple operations.
+
+---
+
+### **7. Clarification on Development Priorities**
+- While leveraging Chainweb node functionality for this proposal, **this shall not deter the release of current developments.**
+- The implementation of a WebRTC endpoint should be treated as a parallel enhancement, aligning with the roadmap without disrupting ongoing priorities.
+
