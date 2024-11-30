@@ -1,0 +1,44 @@
+
+(begin-tx)
+(load "include/fungible-v2.pact")
+(env-data { 'ns: "test" })
+(define-namespace "test" (sig-keyset) (sig-keyset))
+(load "include/fungible-util.pact")
+(load "restricted-fungible-v1.pact")
+(load "restricted-fungible-v1-reference.pact")
+(env-data { 'bob: ["Bob"], 'alice: ["Alice"], 'carol: ["Carol"]})
+(create-account "Bob" (read-keyset 'bob))
+(create-account "Alice" (read-keyset 'alice))
+(create-account "Carol" (read-keyset 'carol))
+(test-capability (CREDIT "Bob"))
+(fund "Bob" 100.0)
+(commit-tx)
+
+(begin-tx)
+(use test.restricted-fungible-v1-reference)
+(env-sigs
+  [ { 'key: "Bob", 'caps:
+    [ (TRANSFER "Bob" "Alice" 12.0)
+      (TRANSFER "Bob" "Carol" 12.0)]}
+  ])
+
+(expect "Bob -> Carol 12.0 success"
+  "Write succeeded"
+  (transfer "Bob" "Carol" 12.0))
+(expect-failure "Bob -> Alice 12.0 failure, transfer"
+  "Transfer restriction detected"
+  (transfer "Bob" "Alice" 11.0))
+(expect-failure "Bob -> Alice 12.0 failure, transfer-create"
+  "Transfer restriction detected"
+  (transfer-create "Bob" "Alice" (read-keyset 'alice) 11.0))
+(rollback-tx)
+
+(begin-tx)
+(use test.restricted-fungible-v1-reference)
+(env-sigs
+  [ { 'key: "Bob", 'caps:
+    [ (TRANSFER "Bob" "Alice" 1.0)]}
+  ])
+(expect "Bob -> Alice 1.0 success"
+  "Write succeeded"
+  (transfer "Bob" "Alice" 1.0))
