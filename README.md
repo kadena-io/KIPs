@@ -25,6 +25,10 @@ Kadena, namely, Chainweb, our proof-of-work blockchain, and the smart contract l
 | 17  | [KIP-0017: walletconnect-v2-sign implementation spec](https://github.com/kadena-io/KIPs/blob/master/kip-0017.md)        | <img src="https://img.shields.io/badge/Status-Voting_Open-cyan"></img> |
 | 26  | [KIP-0026: Key Derivation and Mnemonic encoding methods](https://github.com/Takadenoshi/KIPs/blob/kip-0026/kip-0026.md) | <img src="https://img.shields.io/badge/Status-Draft-yellow"></img>     |
 | 31  | [KIP-0031: Fungible token Metadata](https://github.com/kadena-io/KIPs/pull/63) | <img src="https://img.shields.io/badge/Status-Draft-yellow"></img>     |
+| 37  | [KIP-0037: Wallet RPC API kadena_getAccount_v1](https://github.com/kadena-io/KIPs/pull/71) | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>     |
+| 38  | [KIP-0038: Wallet RPC API kadena_getAccounts_v2](https://github.com/kadena-io/KIPs/pull/71) | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>     |
+| 39  | [KIP-0039: Wallet RPC API kadena_getNetwork_v1](https://github.com/kadena-io/KIPs/pull/71) | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>     |
+| 40  | [KIP-0040: Wallet RPC API kadena_getNetworks_v1](https://github.com/kadena-io/KIPs/pull/71) | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>     |
 
 
 ## Status Key
