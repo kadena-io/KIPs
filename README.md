@@ -7,28 +7,29 @@ Kadena Improvement Proposals (KIPs)
 Kadena Improvement Proposals (KIPs) are used to support development and
 crowdsource important feature requests for different technologies developed by
 Kadena, namely, Chainweb, our proof-of-work blockchain, and the smart contract language
-[Pact](https://github.com/kadena-io/pact).
+[Pact](https://github.com/kda-community/pact-5).
 
 
 ## Index of KIPs
 
 | ID  | Title                                                                                                                   | Status                                                                 |
 | :-: | :---------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------- |
-|  1  | [KIP-0001: KIP process](https://github.com/kadena-io/KIPs/blob/master/kip-0001.md)                                      | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>    |
-|  2  | [KIP-0002: fungible-v1](https://github.com/kadena-io/KIPs/blob/master/kip-0002.md)                                      | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>    |
-|  4  | [KIP-0004: Pact On-Chain Decryption Primitives](https://github.com/kadena-io/KIPs/blob/master/kip-0004.md)              | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>    |
-|  5  | [KIP-0005: fungible-v2](https://github.com/kadena-io/KIPs/blob/master/kip-0005.md)                                      | <img src="https://img.shields.io/badge/Status-Closed-lightgrey"></img> |
-|  7  | [KIP-0007: Pact Module References](https://github.com/kadena-io/KIPs/blob/master/kip-0007.md)                           | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>    |
-| 11  | [KIP-0011: poly-fungible-v1](https://github.com/kadena-io/KIPs/blob/master/kip-0011/kip-0011.md)                        | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>    |
-| 12  | [KIP-0012: Kadena Single-Key Accounts](https://github.com/kadena-io/KIPs/blob/master/kip-0012/kip-0012.md)              | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img> |
-| 15  | [KIP-0015: quicksign signing api v1](https://github.com/kadena-io/KIPs/blob/master/kip-0015.md)                         | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>    |
-| 17  | [KIP-0017: walletconnect-v2-sign implementation spec](https://github.com/kadena-io/KIPs/blob/master/kip-0017.md)        | <img src="https://img.shields.io/badge/Status-Voting_Open-cyan"></img> |
-| 26  | [KIP-0026: Key Derivation and Mnemonic encoding methods](https://github.com/kadena-io/KIPs/blob/master/kip-0026.md) | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>     |
-| 31  | [KIP-0031: Fungible token Metadata](https://github.com/kadena-io/KIPs/pull/63) | <img src="https://img.shields.io/badge/Status-In%20Discussion-orange"></img>     |
-| 37  | [KIP-0037: Wallet RPC API kadena_getAccount_v1](https://github.com/kadena-io/KIPs/pull/71) | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>     |
-| 38  | [KIP-0038: Wallet RPC API kadena_getAccounts_v2](https://github.com/kadena-io/KIPs/pull/71) | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>     |
-| 39  | [KIP-0039: Wallet RPC API kadena_getNetwork_v1](https://github.com/kadena-io/KIPs/pull/71) | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>     |
-| 40  | [KIP-0040: Wallet RPC API kadena_getNetworks_v1](https://github.com/kadena-io/KIPs/pull/71) | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>     |
+|  1  | [KIP-0001: KIP process](https://github.com/kda-community/KIPs/blob/master/kip-0001.md)                                      | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>    |
+|  2  | [KIP-0002: fungible-v1](https://github.com/kda-community/KIPs/blob/master/kip-0002.md)                                      | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>    |
+|  4  | [KIP-0004: Pact On-Chain Decryption Primitives](https://github.com/kda-community/KIPs/blob/master/kip-0004.md)              | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>    |
+|  5  | [KIP-0005: fungible-v2](https://github.com/kda-community/KIPs/blob/master/kip-0005.md)                                      | <img src="https://img.shields.io/badge/Status-Closed-lightgrey"></img> |
+|  7  | [KIP-0007: Pact Module References](https://github.com/kda-community/KIPs/blob/master/kip-0007.md)                           | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>    |
+| 11  | [KIP-0011: poly-fungible-v1](https://github.com/kda-community/KIPs/blob/master/kip-0011/kip-0011.md)                        | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>    |
+| 12  | [KIP-0012: Kadena Single-Key Accounts](https://github.com/kda-community/KIPs/blob/master/kip-0012/kip-0012.md)              | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img> |
+| 15  | [KIP-0015: quicksign signing api v1](https://github.com/kda-community/KIPs/blob/master/kip-0015.md)                         | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>    |
+| 17  | [KIP-0017: walletconnect-v2-sign implementation spec](https://github.com/kda-community/KIPs/blob/master/kip-0017.md)        | <img src="https://img.shields.io/badge/Status-Voting_Open-cyan"></img> |
+| 24  | [KIP-0024: Pact pure Native](https://github.com/kda-community/KIPs/blob/master/kip-0024.md)                                 | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img> |
+| 26  | [KIP-0026: Key Derivation and Mnemonic encoding methods](https://github.com/kda-community/KIPs/blob/master/kip-0026.md) | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>     |
+| 31  | [KIP-0031: Fungible token Metadata](https://github.com/kda-community/KIPs/pull/63) | <img src="https://img.shields.io/badge/Status-In%20Discussion-orange"></img>     |
+| 37  | [KIP-0037: Wallet RPC API kadena_getAccount_v1](https://github.com/kda-community/KIPs/pull/71) | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>     |
+| 38  | [KIP-0038: Wallet RPC API kadena_getAccounts_v2](https://github.com/kda-community/KIPs/pull/71) | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>     |
+| 39  | [KIP-0039: Wallet RPC API kadena_getNetwork_v1](https://github.com/kda-community/KIPs/pull/71) | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>     |
+| 40  | [KIP-0040: Wallet RPC API kadena_getNetworks_v1](https://github.com/kda-community/KIPs/pull/71) | <img src="https://img.shields.io/badge/Status-Deployed-blue"></img>     |
 
 
 ## Status Key
